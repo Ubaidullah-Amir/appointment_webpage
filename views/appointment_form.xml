@@ -5,12 +5,13 @@
             <t t-call="website.layout">
                 <div class="container">
                     <h1>Create Appointment</h1>
-                    <form action="/create/appointment" method="post">
+                    <form id="appointmentForm" action="/create/appointment" method="post" onsubmit="return validateForm()">
                         <!-- Add CSRF token -->
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                         <div class="form-group">
                             <label for="pateint_id">Patient</label>
                             <select id="pateint_id" name="pateint_id" class="form-control" onchange="updatePatientInfo()">
+                                <option value="">Select a patient</option>
                                 <t t-foreach="patients" t-as="patient">
                                     <option t-att-value="patient.id">
                                         <t t-esc="patient.name"/>
@@ -20,15 +21,15 @@
                         </div>
                         <div class="form-group">
                             <label for="patient_age">Patient Age</label>
-                            <input type="text" id="patient_age" name="patient_age" class="form-control" />
+                            <input type="text" id="patient_age" name="patient_age" class="form-control" readonly="readonly" />
                         </div>
                         <div class="form-group">
                             <label for="patient_gender">Patient Gender</label>
-                            <input type="text" id="patient_gender" name="patient_gender" class="form-control" />
+                            <input type="text" id="patient_gender" name="patient_gender" class="form-control" readonly="readonly" />
                         </div>
                         <div class="form-group">
                             <label for="ref">Reference</label>
-                            <input type="text" id="ref" name="ref" class="form-control" />
+                            <input type="text" id="ref" name="ref" class="form-control" readonly="readonly" />
                         </div>
                         
                         <div class="form-group">
@@ -42,7 +43,8 @@
                         </div>
                         <div class="form-group">
                             <label for="doctor_id">Doctor</label>
-                            <select id="doctor_id" name="doctor_id" class="form-control" >
+                            <select id="doctor_id" name="doctor_id" class="form-control">
+                                <option value="">Select a doctor</option>
                                 <t t-foreach="doctors" t-as="doctor">
                                     <option t-att-value="doctor.id">
                                         <t t-esc="doctor.doctor_name"/>
@@ -71,21 +73,156 @@
                         var patientId = document.getElementById("pateint_id").value;
                         if (patientId) {
                             fetch('/get_patient_info?pateint_id=' + patientId)
-                            .then(response => {
-                                console.log("response",response)
-                                return response.json()
-                                })
+                            .then(response => response.json())
                             .then(data => {
                                 document.getElementById('ref').value = data.ref;
                                 document.getElementById('patient_gender').value = data.gender;
                                 document.getElementById('patient_age').value = data.age;
                             });
+                        } else {
+                            document.getElementById('ref').value = '';
+                            document.getElementById('patient_gender').value = '';
+                            document.getElementById('patient_age').value = '';
                         }
                     }
 
-                    
+                    function validateForm() {
+                        var patientId = document.getElementById("pateint_id").value;
+                        var doctorId = document.getElementById("doctor_id").value;
+                        if (!patientId) {
+                            alert("Please select a valid patient.");
+                            return false;
+                        }
+                        if (!doctorId) {
+                            alert("Please select a valid doctor.");
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var today = new Date().toISOString().split('T')[0];
+                        var now = new Date();
+                        var hours = now.getHours().toString().padStart(2, '0');
+                        var minutes = now.getMinutes().toString().padStart(2, '0');
+                        var currentTime = today + 'T' + hours + ':' + minutes;
+
+                        document.getElementById('booking_Date').value = today;
+                        document.getElementById('appointment_time').value = currentTime;
+                    });
                 </script>
             </t>
         </template>
     </data>
 </odoo>
+
+
+
+
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="appointment_form" name="Appointment Form">
+            <t t-call="website.layout">
+                <div class="container">
+                    <h1>Create Appointment</h1>
+                    <form id="appointmentForm" action="/create/appointment" method="post" onsubmit="return validateForm()">
+                        
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="form-group">
+                            <label for="pateint_id">Patient</label>
+                            <select id="pateint_id" name="pateint_id" class="form-control" onchange="updatePatientInfo()">
+                                <option value="">Select a patient</option>
+                                <t t-foreach="patients" t-as="patient">
+                                    <option t-att-value="patient.id">
+                                        <t t-esc="patient.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="patient_age">Patient Age</label>
+                            <input type="text" id="patient_age" name="patient_age" class="form-control" readonly="readonly" />
+                        </div>
+                        <div class="form-group">
+                            <label for="patient_gender">Patient Gender</label>
+                            <input type="text" id="patient_gender" name="patient_gender" class="form-control" readonly="readonly" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ref">Reference</label>
+                            <input type="text" id="ref" name="ref" class="form-control" readonly="readonly" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority" name="priority" class="form-control">
+                                <option value="0">Normal</option>
+                                <option value="1">Low</option>
+                                <option value="2">High</option>
+                                <option value="3">Very High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor_id">Doctor</label>
+                            <select id="doctor_id" name="doctor_id" class="form-control">
+                                <option value="">Select a doctor</option>
+                                <t t-foreach="doctors" t-as="doctor">
+                                    <option t-att-value="doctor.id">
+                                        <t t-esc="doctor.doctor_name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="appointment_time">Appointment Time</label>
+                            <input type="datetime-local" id="appointment_time" name="appointment_time" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking_Date">Booking Date</label>
+                            <input type="date" id="booking_Date" name="booking_Date" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="note">Note</label>
+                            <textarea id="note" name="note" class="form-control"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Appointment</button>
+                    </form>
+                </div>
+                <script>
+                    function updatePatientInfo() {
+                        var patientId = document.getElementById("pateint_id").value;
+                        if (patientId) {
+                            fetch('/get_patient_info?pateint_id=' + patientId)
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('ref').value = data.ref;
+                                document.getElementById('patient_gender').value = data.gender;
+                                document.getElementById('patient_age').value = data.age;
+                            });
+                        } else {
+                            document.getElementById('ref').value = '';
+                            document.getElementById('patient_gender').value = '';
+                            document.getElementById('patient_age').value = '';
+                        }
+                    }
+
+                    function validateForm() {
+                        var patientId = document.getElementById("pateint_id").value;
+                        var doctorId = document.getElementById("doctor_id").value;
+                        if (!patientId) {
+                            alert("Please select a valid patient.");
+                            return false;
+                        }
+                        if (!doctorId) {
+                            alert("Please select a valid doctor.");
+                            return false;
+                        }
+                        return true;
+                    }
+                </script>
+            </t>
+        </template>
+    </data>
+</odoo>
+ -->
