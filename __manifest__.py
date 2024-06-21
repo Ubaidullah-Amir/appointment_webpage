@@ -8,7 +8,7 @@
     'depends': ['website', 'om_hospital'],
     'data': [
         'views/appointment_form.xml',
-        'views/templates.xml',
+        # 'views/templates.xml',
         'security/ir.model.access.csv',
     ],
     'installable': True,

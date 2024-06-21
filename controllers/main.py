@@ -1,6 +1,7 @@
 # appointment_webpage/controllers/main.py
 from odoo import http
 from odoo.http import request
+import json
 from datetime import datetime
 
 class AppointmentWebpage(http.Controller):
@@ -36,3 +37,23 @@ class AppointmentWebpage(http.Controller):
             'state': 'draft'
         })
         return request.redirect('/appointment')
+    
+
+   
+       
+    @http.route('/get_patient_info', type='http', auth='public', methods=['GET'])
+    def get_patient_info(self):
+        pateint_id = request.params.get('pateint_id')
+        if pateint_id:
+            patient = request.env['om_hospital.pateint'].browse(int(pateint_id))
+            response ={
+                'age': str(patient.age),
+                'gender': str(patient.gender),
+                'ref': str(patient.ref),
+            }
+        else:
+            response = {'error': 'No patientID provided'}
+
+        return json.dumps(response)
+      
+    
