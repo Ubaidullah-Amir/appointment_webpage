@@ -6,6 +6,9 @@
                 <div class="container">
                     <h1>Create Appointment</h1>
                     <form action="/create/appointment" method="post">
+                        <!-- Add CSRF token -->
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        
                         <div class="form-group">
                             <label for="ref">Reference</label>
                             <input type="text" id="ref" name="ref" class="form-control"/>
