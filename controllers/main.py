@@ -36,7 +36,7 @@ class AppointmentWebpage(http.Controller):
             'booking_Date': post.get('booking_Date'),
             'state': 'draft'
         })
-        return request.redirect('/appointment')
+        return request.redirect('/contactus-thank-you')
     
 
    
